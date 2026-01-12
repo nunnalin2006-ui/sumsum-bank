@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SumSum Bank Desktop - ระบบจองคิวออนไลน์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #fff0f6; min-height: 100vh; margin: 0; }
+        .bg-main-pink { background-color: #ff1493; }
+        .text-main-pink { color: #ff1493; }
+        .step-page { display: none; }
+        .step-page.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: white; border-radius: 2rem; padding: 2.5rem; box-shadow: 0 15px 30px rgba(0,0,0,0.05); width: 100%; max-width: 800px; margin: 2rem auto; }
+        input, select { border: 1.5px solid #ffcae5 !important; border-radius: 1rem !important; padding: 1rem !important; width: 100%; outline: none; transition: 0.3s; color: #ff1493; background: white; }
+        input:focus, select:focus { border-color: #ff1493 !important; }
+        .btn-next { background-color: #ff1493; color: white; width: 100%; max-width: 300px; padding: 1rem; border-radius: 1.5rem; font-weight: bold; font-size: 1.25rem; display: block; margin: 2rem auto; transition: 0.3s; text-align: center; border: none; cursor: pointer; }
+        .btn-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 20, 147, 0.3); }
+        .btn-next:disabled { background-color: #ffcae5; cursor: not-allowed; opacity: 0.7; }
+        .option-item { border: 1.5px solid #ffcae5; border-radius: 1.5rem; padding: 1.5rem; cursor: pointer; transition: 0.2s; background: white; }
+        .option-item.selected { border: 3px solid #ff1493; background-color: #fff0f6; }
+        .step-dot { width: 35px; height: 35px; border-radius: 50%; background: #ffcae5; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; z-index: 10; }
+        .step-dot.active { background: #ff1493; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <header class="bg-main-pink p-5 text-white shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="text-3xl font-bold leading-tight">SumSum<br><span class="text-pink-200">Bank</span></div>
+                <div class="h-10 w-[1px] bg-white/40 hidden md:block"></div>
+                <div class="text-xl opacity-90 hidden md:block">ระบบจองคิวออนไลน์</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="p-6">
+        <div class="max-w-3xl mx-auto mb-8 flex justify-between items-center relative px-4">
+            <div class="absolute h-[2px] bg-pink-100 w-[90%] top-[17px] left-[5%] z-0"></div>
+            <div class="step-dot active" id="dot1">1</div>
+            <div class="step-dot" id="dot2">2</div>
+            <div class="step-dot" id="dot3">3</div>
+            <div class="step-dot" id="dot4">4</div>
+            <div class="step-dot" id="dot5">5</div>
+            <div class="step-dot" id="dot6">6</div>
+        </div>
+
+        <section id="step1" class="step-page active">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-10">กรุณาระบุหมายเลขโทรศัพท์มือถือ</h2>
+                <div class="max-w-xs mx-auto">
+                    <label class="text-main-pink font-bold mb-2 block text-sm">หมายเลขโทรศัพท์</label>
+                    <input type="tel" id="phoneInput" placeholder="0XXXXXXXXX" maxlength="10" oninput="validateStep1()" class="text-center text-xl tracking-widest">
+                </div>
+            </div>
+            <button id="btnStep1" class="btn-next" onclick="nextPage(2)" disabled>ถัดไป ❯</button>
+        </section>
+
+        <section id="step2" class="step-page">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-10">กรุณาเลือกประเภทการจองคิว</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="option-item flex items-center gap-4" onclick="selectType(this, 'รับคิวทันที')">
+                        <span class="text-4xl">📱</span> <b>รับคิวทันที</b>
+                    </div>
+                    <div class="option-item flex items-center gap-4" onclick="selectType(this, 'จองคิวล่วงหน้า')">
+                        <span class="text-4xl">📅</span> <b>จองคิวล่วงหน้า</b>
+                    </div>
+                </div>
+            </div>
+            <button id="btnStep2" class="btn-next" onclick="nextPage(3)" disabled>ถัดไป ❯</button>
+        </section>
+
+        <section id="step3" class="step-page">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-10">ค้นหาสาขาที่จองคิว</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-main-pink font-bold block mb-2">จังหวัด</label>
+                        <select id="provinceSelect" onchange="handleProvinceChange()">
+                            <option value="">-- เลือกจังหวัด --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-main-pink font-bold block mb-2">อำเภอ / เขต</label>
+                        <select id="districtSelect" onchange="validateStep3()" disabled>
+                            <option value="">-- เลือกอำเภอ --</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="branchDisplay" class="mt-8 p-4 bg-pink-50 rounded-xl hidden text-center border border-pink-100">
+                    <p class="text-main-pink font-bold" id="branchName">สาขา...</p>
+                </div>
+            </div>
+            <button id="btnStep3" class="btn-next" onclick="nextPage(4)" disabled>ถัดไป ❯</button>
+        </section>
+
+        <section id="step4" class="step-page">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-10">กรุณาเลือกประเภทธุรกรรม</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="option-item" onclick="selectService(this, 'ฝาก / ถอน')">💵 ฝาก / ถอน</div>
+                    <div class="option-item" onclick="selectService(this, 'เปิดบัญชี / บัตรATM')">💳 เปิดบัญชี / บัตรATM</div>
+                    <div class="option-item" onclick="selectService(this, 'ขอสินเชื่อ')">💰 ขอสินเชื่อ</div>
+                    <div class="option-item" onclick="selectService(this, 'ซื้อประกัน / กองทุน')">📈 ซื้อประกัน / กองทุน</div>
+                </div>
+            </div>
+            <button id="btnStep4" class="btn-next" onclick="nextPage(5)" disabled>ถัดไป ❯</button>
+        </section>
+
+        <section id="step5" class="step-page">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">เลือกวันและเวลา</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="text-main-pink font-bold mb-4" id="dateLabel">1. เลือกวันที่</p>
+                        <div id="dateGrid" class="grid grid-cols-3 gap-2"></div>
+                    </div>
+                    <div>
+                        <p class="text-main-pink font-bold mb-4">2. เลือกเวลา (ห่าง 30 นาที)</p>
+                        <div id="timeGrid" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="btnStep5" class="btn-next" onclick="nextPage(6)" disabled>ถัดไป ❯</button>
+        </section>
+
+        <section id="step6" class="step-page">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">ยืนยันการจองคิว</h2>
+                <div id="summaryContent" class="space-y-4 border-t pt-6"></div>
+            </div>
+            <button class="btn-next" onclick="nextPage(7)">ยืนยันจองคิว</button>
+        </section>
+
+        <section id="step7" class="step-page text-center">
+            <div id="ticket" class="card inline-block text-left border-2 border-dashed border-pink-300">
+                <div class="flex flex-col md:flex-row gap-10 items-center">
+                    <div id="ticketDetails" class="space-y-3"></div>
+                    <div id="qrcode" class="p-2 bg-white border"></div>
+                </div>
+            </div>
+            <button class="btn-next" onclick="downloadTicket()">💾 ดาวน์โหลดรูปบัตรคิว</button>
+        </section>
+    </main>
+
+    <script>
+        let userData = { phone:'', type:'', province:'', district:'', service:'', date:'', time:'' };
+
+        const thaiData = {
+            "กรุงเทพมหานคร": ["เขตพระนคร", "เขตปทุมวัน", "เขตบางรัก", "เขตจตุจักร", "เขตบางนา"],
+            "ขอนแก่น": ["เมืองขอนแก่น", "บ้านไผ่", "พล", "ชุมแพ"],
+            "เชียงใหม่": ["เมืองเชียงใหม่", "แม่ริม", "หางดง", "สันทราย"],
+            "ชลบุรี": ["เมืองชลบุรี", "บางละมุง", "ศรีราชา", "สัตหีบ"]
+        };
+
+        function nextPage(step) {
+            document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            for(let i=1; i<=6; i++) {
+                const dot = document.getElementById('dot'+i);
+                if(dot) dot.classList.toggle('active', i <= step);
+            }
+            if(step === 3) initProvinces();
+            if(step === 5) initDateTime();
+            if(step === 6) renderSummary();
+            if(step === 7) renderTicket();
+            window.scrollTo(0,0);
+        }
+
+        function validateStep1() {
+            const input = document.getElementById('phoneInput');
+            input.value = input.value.replace(/\D/g, '');
+            userData.phone = input.value;
+            document.getElementById('btnStep1').disabled = (input.value.length !== 10);
+        }
+
+        // หน้า 2: เลือกประเภท (แก้ไข Logic ให้รองรับ "รับคิวทันที")
+        function selectType(el, type) {
+            document.querySelectorAll('#step2 .option-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            userData.type = type;
+            
+            // ถ้าเลือกรับคิวทันที ให้ Reset วันที่ก่อน เพื่อป้องกันข้อมูลเก่าค้าง
+            userData.date = ''; 
+            document.getElementById('btnStep2').disabled = false;
+        }
+
+        function initProvinces() {
+            const pSel = document.getElementById('provinceSelect');
+            if(pSel.options.length > 1) return;
+            Object.keys(thaiData).sort().forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; opt.text = p;
+                pSel.appendChild(opt);
+            });
+        }
+
+        function handleProvinceChange() {
+            const province = document.getElementById('provinceSelect').value;
+            const dSel = document.getElementById('districtSelect');
+            dSel.innerHTML = '<option value="">-- เลือกอำเภอ --</option>';
+            document.getElementById('branchDisplay').classList.add('hidden');
+            if(province) {
+                dSel.disabled = false;
+                thaiData[province].sort().forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.text = d;
+                    dSel.appendChild(opt);
+                });
+            } else {
+                dSel.disabled = true;
+            }
+            validateStep3();
+        }
+
+        function validateStep3() {
+            const province = document.getElementById('provinceSelect').value;
+            const district = document.getElementById('districtSelect').value;
+            const btn = document.getElementById('btnStep3');
+            userData.province = province;
+            userData.district = district;
+            if(province && district) {
+                btn.disabled = false;
+                document.getElementById('branchDisplay').classList.remove('hidden');
+                document.getElementById('branchName').innerText = "SumSum Bank สาขา " + district;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        function selectService(el, s) {
+            document.querySelectorAll('#step4 .option-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            userData.service = s;
+            document.getElementById('btnStep4').disabled = false;
+        }
+
+        // หน้า 5: ปรับ Logic วันที่สำหรับ "รับคิวทันที"
+        function initDateTime() {
+            const dGrid = document.getElementById('dateGrid');
+            const dLabel = document.getElementById('dateLabel');
+            dGrid.innerHTML = '';
+            
+            let date = new Date();
+
+            if(userData.type === 'รับคิวทันที') {
+                // ถ้าเป็นรับคิวทันที ให้ฟิกเป็นวันนี้เลย
+                dLabel.innerText = "1. วันที่รับคิว (วันนี้)";
+                let fullToday = date.toLocaleDateString('th-TH', {weekday:'long', day:'numeric', month:'long'});
+                let dNum = date.getDate();
+                let mStr = date.toLocaleDateString('th-TH', {month:'short'});
+                
+                let div = document.createElement('div');
+                div.className = "border rounded-xl p-3 text-center cursor-default bg-main-pink text-white shadow-md";
+                div.innerHTML = `<p class='text-xs opacity-80'>${mStr}</p><p class='text-xl font-bold'>${dNum}</p>`;
+                dGrid.appendChild(div);
+                
+                userData.date = fullToday; // ล็อกค่าเป็นวันนี้
+            } else {
+                // ถ้าจองล่วงหน้า ให้เลือกได้ 6 วันทำการ
+                dLabel.innerText = "1. เลือกวันที่จองล่วงหน้า";
+                let count = 0;
+                let tempDate = new Date();
+                while(count < 6) {
+                    let day = tempDate.getDay();
+                    if(day !== 0 && day !== 6) { 
+                        let dNum = tempDate.getDate();
+                        let mStr = tempDate.toLocaleDateString('th-TH', {month:'short'});
+                        let full = tempDate.toLocaleDateString('th-TH', {weekday:'long', day:'numeric', month:'long'});
+                        let div = document.createElement('div');
+                        div.className = "border rounded-xl p-3 text-center cursor-pointer hover:bg-pink-50";
+                        div.innerHTML = `<p class='text-xs text-gray-400'>${mStr}</p><p class='text-xl font-bold text-main-pink'>${dNum}</p>`;
+                        div.onclick = function() {
+                            document.querySelectorAll('#dateGrid div').forEach(v => v.classList.remove('bg-main-pink', 'text-white'));
+                            this.classList.add('bg-main-pink', 'text-white');
+                            userData.date = full;
+                            checkStep5();
+                        };
+                        dGrid.appendChild(div);
+                        count++;
+                    }
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+            }
+
+            // แสดงตารางเวลาเหมือนเดิม
+            const tGrid = document.getElementById('timeGrid');
+            tGrid.innerHTML = '';
+            const times = ["08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "13:00", "13:30", "14:00", "14:30", "15:00"];
+            times.forEach(t => {
+                let div = document.createElement('div');
+                div.className = "border rounded-lg p-2 text-center cursor-pointer hover:bg-pink-50 text-sm";
+                div.innerText = t + " น.";
+                div.onclick = function() {
+                    document.querySelectorAll('#timeGrid div').forEach(v => v.classList.remove('bg-main-pink', 'text-white'));
+                    this.classList.add('bg-main-pink', 'text-white');
+                    userData.time = t + " น.";
+                    checkStep5();
+                };
+                tGrid.appendChild(div);
+            });
+            checkStep5();
+        }
+
+        function checkStep5() {
+            document.getElementById('btnStep5').disabled = !(userData.date && userData.time);
+        }
+
+        function renderSummary() {
+            document.getElementById('summaryContent').innerHTML = `
+                <div class="flex justify-between"><span>ประเภทการจอง:</span><b class="text-main-pink">${userData.type}</b></div>
+                <div class="flex justify-between"><span>เบอร์โทรศัพท์:</span><b>${userData.phone}</b></div>
+                <div class="flex justify-between"><span>สาขา:</span><b>${userData.district} (${userData.province})</b></div>
+                <div class="flex justify-between"><span>ประเภทบริการ:</span><b>${userData.service}</b></div>
+                <div class="flex justify-between"><span>วันที่:</span><b class="text-main-pink">${userData.date}</b></div>
+                <div class="flex justify-between"><span>เวลา:</span><b class="text-main-pink">${userData.time}</b></div>
+            `;
+        }
+
+        function renderTicket() {
+            document.getElementById('ticketDetails').innerHTML = `
+                <h3 class="text-main-pink font-bold text-xl mb-4">${userData.type}สำเร็จ</h3>
+                <p class="text-sm"><b>บริการ:</b> ${userData.service}</p>
+                <p class="text-sm"><b>สาขา:</b> ${userData.district}</p>
+                <div class="bg-pink-50 p-3 rounded-lg border border-pink-100 my-2">
+                    <p class="text-main-pink font-bold">${userData.date}</p>
+                    <p class="text-main-pink font-bold text-lg">${userData.time}</p>
+                </div>
+                <p class="text-[10px] text-gray-400">เบอร์ติดต่อ: ${userData.phone}</p>
+            `;
+            document.getElementById('qrcode').innerHTML = '';
+            new QRCode(document.getElementById("qrcode"), { text: "SUMSUM-"+Date.now(), width: 120, height: 120, colorDark: "#ff1493" });
+        }
+
+        function downloadTicket() {
+            html2canvas(document.getElementById('ticket')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'SumSum-Queue.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
